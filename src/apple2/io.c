@@ -5,14 +5,14 @@
  * I/O Routines
  */
 
+#define USING_FUJINET_LIB 1
+
 #include "io.h"
 #include <stdint.h>
 #include <conio.h>
 #include <stdlib.h>
 #include <peekpoke.h> // For the insanity in io_boot()
 #include "globals.h"
-
-#include "fujinet-fuji.h"
 
 #define FUJICMD_RESET 0xFF
 #define FUJICMD_GET_SSID 0xFE

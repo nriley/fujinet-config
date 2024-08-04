@@ -10,6 +10,9 @@
 # Space or comma separated list of cc65 supported target platforms to build for.
 # Default: c64 (lowercase!)
 TARGETS := apple2gs
+FUJINET_LIB_VERSION = 3.0.1
+FUJINET_LIB = fujinet-lib
+FUJINET_LIB_VERSION_DIR = $(FUJINET_LIB)/$(FUJINET_LIB_VERSION)-$(TARGETS)
 
 # Name of the final, single-file executable.
 # Default: name of the current dir with target name appended
@@ -27,7 +30,7 @@ CONFIG  :=
 
 # Additional C compiler flags and options.
 # Default: none
-CFLAGS = -I -P +F cc=-p\"src:apple2:orcac.h\" cc=-isrc cc=-isrc:apple2 cc=-i13:cc65 cc=-dBUILD_APPLE2 cc=-d__APPLE2__ cc=-d__fastcall__=
+CFLAGS = -I -P +F cc=-p\"src:apple2:orcac.h\" cc=-isrc cc=-isrc:apple2 cc=-i13:cc65 cc=-dBUILD_APPLE2 cc=-d__APPLE2__ cc=-d__APPLE2ENH__ cc=-d__fastcall__=
 
 # Additional assembler flags and options.
 # Default: none
@@ -209,6 +212,9 @@ TARGETLIST := $(subst $(COMMA),$(SPACE),$(TARGETS))
 
 ifeq ($(words $(TARGETLIST)),1)
 
+FUJINET_LIB_DOWNLOAD_URL = https://github.com/FujiNetWIFI/fujinet-lib/releases/download/v$(FUJINET_LIB_VERSION)/fujinet-lib-$(TARGETLIST)-$(FUJINET_LIB_VERSION).zip
+FUJINET_LIB_DOWNLOAD_FILE = $(FUJINET_LIB)/fujinet-lib-$(TARGETLIST)-$(FUJINET_LIB_VERSION).zip
+
 # Set PROGRAM to something like 'myprog.c64'.
 override PROGRAM := $(PROGRAM)
 
@@ -236,6 +242,7 @@ DEPENDS := $(OBJECTS:.root=.d)
 # Add to LIBS something like 'src/foo.lib src/c64/bar.lib'.
 LIBS += $(wildcard $(SRCDIR)/*.lib)
 LIBS += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.lib)
+LIBS += $(FUJINET_LIB_VERSION_DIR)/fujinet-$(TARGETLIST)-$(FUJINET_LIB_VERSION).lib
 
 # Add to CONFIG something like 'src/c64/bar.cfg src/foo.cfg'.
 CONFIG += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.cfg)
@@ -248,9 +255,9 @@ ifneq ($(word 2,$(CONFIG)),)
 endif
 
 .SUFFIXES:
-.PHONY: all test clean zap love
+.PHONY: all test clean get_fujinet_lib zap love
 
-all: $(PROGRAM)
+all: get_fujinet_lib $(PROGRAM)
 
 -include $(DEPENDS)
 -include $(STATEFILE)
@@ -283,7 +290,26 @@ endif
 $(foreach o,$(subst $(COMMA),$(SPACE),$(OPTIONS)),$(eval $(_$o_)))
 
 # Strip potential variant suffix from the actual cc65 target.
-CC65TARGET := $(firstword $(subst .,$(SPACE),$(TARGETLIST)))
+CC65TARGET := $(firstword $(subst .,$(SPACE),$(TARGETLIST)))enh
+
+get_fujinet_lib:
+	@if [ ! -f "$(FUJINET_LIB_DOWNLOAD_FILE)" ]; then \
+		if [ -d "$(FUJINET_LIB_VERSION_DIR)" ]; then \
+		  echo "A directory already exists with version $(FUJINET_LIB_VERSION) - please remove it first"; \
+			exit 1; \
+		fi; \
+		HTTPSTATUS=$$(curl -Is $(FUJINET_LIB_DOWNLOAD_URL) | head -n 1 | awk '{print $$2}'); \
+		if [ "$${HTTPSTATUS}" == "404" ]; then \
+			echo "ERROR: Unable to find file $(FUJINET_LIB_DOWNLOAD_URL)"; \
+			exit 1; \
+		fi; \
+		echo "Downloading fujinet-lib for $(TARGETLIST) version $(FUJINET_LIB_VERSION) from $(FUJINET_LIB_DOWNLOAD_URL)"; \
+		mkdir -p $(FUJINET_LIB); \
+		curl -L $(FUJINET_LIB_DOWNLOAD_URL) -o $(FUJINET_LIB_DOWNLOAD_FILE); \
+		echo "Unzipping to $(FUJINET_LIB)"; \
+		unzip -o $(FUJINET_LIB_DOWNLOAD_FILE) -d $(FUJINET_LIB_VERSION_DIR); \
+		echo "Unzip complete."; \
+	fi
 
 # The remaining targets.
 $(TARGETOBJDIR):
@@ -328,6 +354,7 @@ clean:
 	$(call RMFILES,$(REMOVES))
 	$(call RMFILES,$(PROGRAM))
 	$(call RMFILES,*.map)
+	rm -rf dist/
 
 else # $(words $(TARGETLIST)),1
 

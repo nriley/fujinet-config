@@ -94,27 +94,27 @@ extern unsigned char copy_host_slot;
 extern bool copy_mode;
 extern SFSubState sf_subState;
 
-void destination_host_slot_init()
+void destination_host_slot_init(void)
 {
   screen_destination_host_slot((char *)hostSlots[selected_host_slot],(char *)path);
   dh_subState=DH_DISPLAY;
 }
 
-void destination_host_slot_display()
+void destination_host_slot_display(void)
 {
   io_get_host_slots(&hostSlots[0]);
   screen_hosts_and_devices_host_slots(&hostSlots[0]);
   dh_subState=DH_CHOOSE;
 }
 
-void destination_host_slot_choose()
+void destination_host_slot_choose(void)
 {
   screen_destination_host_slot_choose();
   while (dh_subState==DH_CHOOSE)
     dh_subState=input_destination_host_slot_choose();
 }
 
-void destination_host_slot_done()
+void destination_host_slot_done(void)
 {
   state=SELECT_FILE;
   sf_subState=SF_INIT;

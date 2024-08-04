@@ -486,7 +486,7 @@ void screen_select_file_prev(void)
 }
 
 #pragma warn (unused-param, push, off)
-void screen_select_file_display_long_filename(char *e)
+void screen_select_file_display_long_filename(const char *e)
 {
   // it wasn't this.
   /* gotoxy(0,19); */
@@ -500,7 +500,7 @@ void screen_select_file_next(void)
 }
 
 #pragma warn (unused-param, push, off)
-void screen_select_file_display_entry(unsigned char y, char* e, unsigned entryType)
+void screen_select_file_display_entry(unsigned char y, const char* e, unsigned entryType)
 {
   gotoxy(0,y+3);
   cprintf("%-40s",&e[2]); // skip the first two chars from FN (hold over from Adam)
@@ -624,7 +624,7 @@ void screen_select_file_new_name(void)
   screen_print_menu(" NEW MEDIA: ENTER FILENAME \r\n","");
 }
 
-void screen_hosts_and_devices_long_filename(char *f)
+void screen_hosts_and_devices_long_filename(const char *f)
 {
   // TODO: implement
   if (strlen(f)>31)

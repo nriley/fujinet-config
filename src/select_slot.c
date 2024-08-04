@@ -99,7 +99,7 @@ char mode=0;
 bool create=false;
 SSSubState ss_subState;
 
-void select_slot_init()
+void select_slot_init(void)
 {
   if (quick_boot==true)
     {
@@ -111,7 +111,7 @@ void select_slot_init()
     ss_subState=SS_DISPLAY;
 }
 
-void select_slot_display()
+void select_slot_display(void)
 {
   if (create==true)
     {
@@ -145,7 +145,7 @@ void select_slot_eject(unsigned char ds)
   screen_select_slot_eject(ds);
 }
 
-void select_slot_choose()
+void select_slot_choose(void)
 {
   screen_select_slot_choose();
 
@@ -153,7 +153,7 @@ void select_slot_choose()
     ss_subState=input_select_slot_choose();
 }
 
-void select_slot_done()
+void select_slot_done(void)
 {
 #ifdef __ORCAC__
   static char filename[256];
